@@ -10,6 +10,7 @@
 #include "jitc.h"
 #include "parser.h"
 #include "system.h"
+#include <math.h>
 
 /* export LD_LIBRARY_PATH=. */
 
@@ -69,12 +70,20 @@ reflect(const struct parser_dag *dag, FILE *file)
 static void
 generate(const struct parser_dag *dag, FILE *file)
 {
-	fprintf(file, "double evaluate(void) {\n");
+	fprintf(file, "double evaluate(double (*my_ptr)(double)) {\n");
 	reflect(dag, file);
-	fprintf(file, "return t%d;\n}\n", dag->id);
+	fprintf(file, "return (*my_ptr)(t%d);\n}\n", dag->id);
 }
 
-typedef double (*evaluate_t)(void);
+typedef double (*evaluate_t)(double (*sig_ptr)(double));
+
+double sigmoid(double num){
+	double t1, t2, t3;
+	t1 = 1;
+	t2 = 1 + exp(-1*num);
+	t3 = t1/t2;
+	return t3;
+}
 
 int
 main(int argc, char *argv[])
@@ -84,6 +93,7 @@ main(int argc, char *argv[])
 	const char *SOFILE = "out.so";
 	struct jitc *jitc;
 	evaluate_t fnc;
+	double (*sig)(double) = &sigmoid;
 	
 	FILE *file;
 
@@ -128,7 +138,7 @@ main(int argc, char *argv[])
 		TRACE(0);
 		return -1;
 	}
-	printf("%f\n", fnc());
+	printf("%f\n", fnc(sig));
 	
 
 	/* done */
