@@ -6,6 +6,3 @@ This is done using fork(), execv() and waitpid() system calls. As a result of th
 This is loaded into process memory using the dlopen() system call.
 To make a function call, a lookup is done using dlsym() to get the address of the dynamically created function in memory. 
 Using this address, a system call is made in the main function
-
-# Project Structure and Summary
-...
